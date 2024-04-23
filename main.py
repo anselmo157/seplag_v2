@@ -53,10 +53,7 @@ def update_cpf(value, associado_id):
 
 
 def update_associate(associado, seplag):
-    if not seplag:
-        print('Não tem dado')
-    else:
-        print(seplag)
+    print(seplag)
 
 
 if __name__ == '__main__':
@@ -89,4 +86,7 @@ if __name__ == '__main__':
             else:
                 continue
 
-        update_associate(associados[i], query_seplag)
+        if not query_seplag:
+            print("Não tem dado")
+        else :
+            update_associate(associados[i], query_seplag[0])
