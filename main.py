@@ -52,15 +52,77 @@ def update_cpf(value, associado_id):
     execute_sql(sql, sql_values)
 
 
+def update_matricula(value, associado_id):
+    sql = """update associados set matricula = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+
+def update_orgao(value, associado_id):
+    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+
+def update_folha(value, associado_id):
+    sql = """update associados set folhapagamento_id = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+
+def update_cargo(value, associado_id):
+    sql = """update associados set postograduacao_id = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+
+def update_cidade(value, associado_id):
+    sql = """update associados set cidade_id = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+def update_telefone(value, associado_id):
+    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+def update_endereco(value_cep, value_endereco,value_numero, value_complemento, value_bairro, value_municipio,associado_id):
+    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
+    sql_values = (value_cep, associado_id)
+    execute_sql(sql, sql_values)
+
+
 def update_associate(associado, seplag):
-    print(seplag)
+    cpf_associado = associado[3]
+    matricula_associado = associado[4]
+    email1_associado = associado[5]
+    email2_associado = associado[6]
+    folha_associado = associado[7]
+    orgao_associado = associado[8]
+    cargo_associado = associado[10]
+    cidade_associado = associado[9]
+
+    cpf_seplag = seplag[1]
+    matricula_seplag = seplag[2]
+    orgao_seplag = seplag[3]
+    folha_seplag = seplag[4]
+    cargo_seplag = seplag[5]
+    email_seplag = seplag[6]
+    telefone = seplag[7]
+    cep = seplag[8]
+    endereco = seplag[9]
+    numero = seplag[10]
+    complemento = seplag[11]
+    bairro = seplag[12]
+    municipio = seplag[13]
+
+    if cpf is None or cpf == '':
+        print(cpf_seplag)
+        print(associado)
 
 
 if __name__ == '__main__':
-    sql_associados = """select * from associados
-    join orgaoaverbadores ON orgaoaverbadores.id_orgaoaverbador = associados.orgaoaverbador_id
-    order by nome_associado 
-    """
+    sql_associados = """select * from associados order by nome_associado"""
 
     associados = query_db(sql_associados)
 
@@ -87,6 +149,6 @@ if __name__ == '__main__':
                 continue
 
         if not query_seplag:
-            print("Não tem dado")
-        else :
+            print('Não tem dados')
+        else:
             update_associate(associados[i], query_seplag[0])
