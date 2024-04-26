@@ -1,4 +1,5 @@
 import psycopg2
+from datetime import datetime
 import pandas as pd
 
 
@@ -81,18 +82,53 @@ def update_cidade(value, associado_id):
     sql_values = (value, associado_id)
     execute_sql(sql, sql_values)
 
-def update_telefone(value, associado_id):
-    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
-    sql_values = (value, associado_id)
-    execute_sql(sql, sql_values)
 
-def update_endereco(value_cep, value_endereco,value_numero, value_complemento, value_bairro, value_municipio,associado_id):
-    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
-    sql_values = (value_cep, associado_id)
-    execute_sql(sql, sql_values)
+def update_telefone(value, associado_id):
+    ddd = None
+    phone = None
+
+    sql_count = """select count(id_telefone) from telefone where associado_id = ('%s')""" % associado_id
+    count = query_db(sql_count)
+
+    if count[0][0] == 0:
+        if len(value) < 10:
+            ddd = '00'
+            if len(value) < 8:
+                phone = '3' + str(value)
+            else:
+                phone = str(value)
+        else:
+            ddd = str(value[:2])
+            phone = str(value[2:])
+        print(ddd, phone)
+
+        sql = """insert into public.telefone (numero_telefone, codigo_area, telecomempresa_id, associado_id,
+        created, modified) values(%s, %s, %s, %s, %s, %s)"""
+        sql_values = (phone, int(ddd), 5, associado_id, datetime.now(), datetime.now())
+        execute_sql(sql, sql_values)
+
+
+def update_endereco(value_cep, value_endereco, value_numero, value_complemento, value_bairro, value_municipio,
+                    associado_id):
+    cidade_id = None
+    sql_count = """select count(id_telefone) from telefone where associado_id = ('%s')""" % associado_id
+    count = query_db(sql_count)
+
+    if count[0][0] == 0:
+        sql_cidade = """select id_cidade from cidades where nome_municipio = ('%s')""" % value_municipio
+        aux = query_db(sql_cidade)
+        if len(aux) > 0:
+            cidade_id = aux[0][0]
+
+        sql = """insert into public.enderecos (cep, logradouro, numero, complemento, bairro, cidade_id, associado_id,
+        denominacao, created, modified) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        sql_values = (value_cep, value_endereco, value_numero, value_complemento, value_bairro, cidade_id, associado_id,
+                      'Endereco Importação', datetime.now(), datetime.now())
+        execute_sql(sql, sql_values)
 
 
 def update_associate(associado, seplag):
+    id_associado = associado[0]
     cpf_associado = associado[3]
     matricula_associado = associado[4]
     email1_associado = associado[5]
@@ -116,9 +152,44 @@ def update_associate(associado, seplag):
     bairro = seplag[12]
     municipio = seplag[13]
 
-    if cpf is None or cpf == '':
-        print(cpf_seplag)
-        print(associado)
+    if cpf_associado is None and cpf_associado == '':
+        None
+        #print(cpf_seplag)
+
+    if matricula_associado is None and matricula_associado == '':
+        None
+        #print(matricula_associado)
+
+    if email1_associado is None and email1_associado == '':
+        None
+        #print(email1_associado)
+
+    if (email2_associado is None and email2_associado == '') and email_seplag != email1_associado:
+        None
+        #print(email2_associado)
+
+    if orgao_associado is None and orgao_associado == '':
+        None
+        #print(orgao_associado)
+
+    if folha_associado is None and folha_associado == '':
+        None
+        #print(folha_associado)
+
+    if cargo_associado is None and cargo_associado == '':
+        None
+        #print(cargo_associado)
+
+    if cidade_associado is None and cidade_associado == '':
+        None
+        #print(cidade_associado)
+
+    if telefone is not None and telefone != '':
+        update_telefone(telefone, id_associado)
+
+    if endereco is not None and endereco != '':
+        None
+       # update_endereco(cep, endereco, numero, complemento, bairro, municipio, id_associado)
 
 
 if __name__ == '__main__':
@@ -149,6 +220,7 @@ if __name__ == '__main__':
                 continue
 
         if not query_seplag:
-            print('Não tem dados')
+            None
+            #print('Não tem dados')
         else:
             update_associate(associados[i], query_seplag[0])
