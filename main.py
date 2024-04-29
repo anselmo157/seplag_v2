@@ -73,33 +73,38 @@ def update_email2(value, associado_id):
 def update_orgao(value, associado_id):
     sql_find = """select id_orgaoaverbador from orgaoaverbadores where codigo_orgao_averbador = ('%s')""" % value
     orgaoaverbador_id = query_db(sql_find)
-    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
-    sql_values = (orgaoaverbador_id[0][0], associado_id)
-    execute_sql(sql, sql_values)
+    if len(orgaoaverbador_id) > 0:
+        sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
+        sql_values = (orgaoaverbador_id[0][0], associado_id)
+        execute_sql(sql, sql_values)
 
 
 def update_folha(value, associado_id):
     sql_find = """select id_folhapagamento from folhapagamentos where codigo_folha = ('%s')""" % value
     folhapagamento_id = query_db(sql_find)
-    sql = """update associados set folhapagamento_id = %s where id_associado = %s"""
-    sql_values = (folhapagamento_id[0][0], associado_id)
-    execute_sql(sql, sql_values)
+    if len(folhapagamento_id) > 0:
+        sql = """update associados set folhapagamento_id = %s where id_associado = %s"""
+        sql_values = (folhapagamento_id[0][0], associado_id)
+        execute_sql(sql, sql_values)
 
 
 def update_cargo(value, associado_id):
-    sql_find = """select id_postograduacao from postograduacoes where descricao_posto = ('%s')""" % value
-    folhapagamento_id = query_db(sql_find)
-    sql = """update associados set postograduacao_id = %s where id_associado = %s"""
-    sql_values = (folhapagamento_id[0][0], associado_id)
-    execute_sql(sql, sql_values)
+    cargo = str(value).replace('º', '')
+    sql_find = """select id_postograduacao from postograduacoes where descricao_posto = ('%s')""" % cargo
+    postograduacao_id = query_db(sql_find)
+    if len(postograduacao_id) > 0:
+        sql = """update associados set postograduacao_id = %s where id_associado = %s"""
+        sql_values = (postograduacao_id[0][0], associado_id)
+        execute_sql(sql, sql_values)
 
 
 def update_cidade(value, associado_id):
     sql_cidade = """select id_cidade from cidades where nome_municipio = ('%s')""" % value
     cidade_id = query_db(sql_cidade)
-    sql = """update associados set cidade_id = %s where id_associado = %s"""
-    sql_values = (cidade_id[0][0], associado_id)
-    execute_sql(sql, sql_values)
+    if len(cidade_id) > 0:
+        sql = """update associados set cidade_id = %s where id_associado = %s"""
+        sql_values = (cidade_id[0][0], associado_id)
+        execute_sql(sql, sql_values)
 
 
 def update_telefone(value, associado_id):
@@ -182,16 +187,16 @@ def update_associate(associado, seplag):
         if (email2_associado is None or email2_associado == '') and email_seplag != email1_associado:
             update_email2(email_seplag, id_associado)
 
-    if orgao_associado is None and orgao_associado == '':
+    if orgao_associado is None or orgao_associado == '':
         update_orgao(orgao_seplag, id_associado)
 
-    if folha_associado is None and folha_associado == '':
+    if folha_associado is None or folha_associado == '':
         update_folha(folha_seplag, id_associado)
 
-    if cargo_associado is None and cargo_associado == '':
+    if cargo_associado is None or cargo_associado == '':
         update_cargo(cargo_seplag, id_associado)
 
-    if cidade_associado is None and cidade_associado == '':
+    if cidade_associado is None or cidade_associado == '':
         update_cidade(municipio, id_associado)
 
     if telefone is not None and telefone != '':
