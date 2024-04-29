@@ -1,6 +1,5 @@
 import psycopg2
 from datetime import datetime
-import pandas as pd
 
 
 def connect_db():
@@ -59,27 +58,47 @@ def update_matricula(value, associado_id):
     execute_sql(sql, sql_values)
 
 
-def update_orgao(value, associado_id):
-    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
+def update_email1(value, associado_id):
+    sql = """update associados set email1 = %s where id_associado = %s"""
     sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+
+def update_email2(value, associado_id):
+    sql = """update associados set email2 = %s where id_associado = %s"""
+    sql_values = (value, associado_id)
+    execute_sql(sql, sql_values)
+
+
+def update_orgao(value, associado_id):
+    sql_find = """select id_orgaoaverbador from orgaoaverbadores where codigo_orgao_averbador = ('%s')""" % value
+    orgaoaverbador_id = query_db(sql_find)
+    sql = """update associados set orgaoaverbador_id = %s where id_associado = %s"""
+    sql_values = (orgaoaverbador_id[0][0], associado_id)
     execute_sql(sql, sql_values)
 
 
 def update_folha(value, associado_id):
+    sql_find = """select id_folhapagamento from folhapagamentos where codigo_folha = ('%s')""" % value
+    folhapagamento_id = query_db(sql_find)
     sql = """update associados set folhapagamento_id = %s where id_associado = %s"""
-    sql_values = (value, associado_id)
+    sql_values = (folhapagamento_id[0][0], associado_id)
     execute_sql(sql, sql_values)
 
 
 def update_cargo(value, associado_id):
+    sql_find = """select id_postograduacao from postograduacoes where descricao_posto = ('%s')""" % value
+    folhapagamento_id = query_db(sql_find)
     sql = """update associados set postograduacao_id = %s where id_associado = %s"""
-    sql_values = (value, associado_id)
+    sql_values = (folhapagamento_id[0][0], associado_id)
     execute_sql(sql, sql_values)
 
 
 def update_cidade(value, associado_id):
+    sql_cidade = """select id_cidade from cidades where nome_municipio = ('%s')""" % value
+    cidade_id = query_db(sql_cidade)
     sql = """update associados set cidade_id = %s where id_associado = %s"""
-    sql_values = (value, associado_id)
+    sql_values = (cidade_id[0][0], associado_id)
     execute_sql(sql, sql_values)
 
 
@@ -152,44 +171,35 @@ def update_associate(associado, seplag):
     bairro = seplag[12]
     municipio = seplag[13]
 
-    if cpf_associado is None and cpf_associado == '':
-        None
-        #print(cpf_seplag)
+    if cpf_associado is None or cpf_associado == '':
+        update_cpf(cpf_seplag, id_associado)
 
-    if matricula_associado is None and matricula_associado == '':
-        None
-        #print(matricula_associado)
+    if matricula_associado is None or matricula_associado == '':
+        update_matricula(matricula_seplag, id_associado)
 
-    if email1_associado is None and email1_associado == '':
-        None
-        #print(email1_associado)
-
-    if (email2_associado is None and email2_associado == '') and email_seplag != email1_associado:
-        None
-        #print(email2_associado)
+    if email1_associado is None or email1_associado == '':
+        update_email1(email_seplag, id_associado)
+    else:
+        if (email2_associado is None or email2_associado == '') and email_seplag != email1_associado:
+            update_email2(email_seplag, id_associado)
 
     if orgao_associado is None and orgao_associado == '':
-        None
-        #print(orgao_associado)
+        update_orgao(orgao_seplag, id_associado)
 
     if folha_associado is None and folha_associado == '':
-        None
-        #print(folha_associado)
+        update_folha(folha_seplag, id_associado)
 
     if cargo_associado is None and cargo_associado == '':
-        None
-        #print(cargo_associado)
+        update_cargo(cargo_seplag, id_associado)
 
     if cidade_associado is None and cidade_associado == '':
-        None
-        #print(cidade_associado)
+        update_cidade(municipio, id_associado)
 
     if telefone is not None and telefone != '':
         update_telefone(telefone, id_associado)
 
     if endereco is not None and endereco != '':
-        None
-       # update_endereco(cep, endereco, numero, complemento, bairro, municipio, id_associado)
+        update_endereco(cep, endereco, numero, complemento, bairro, municipio, id_associado)
 
 
 if __name__ == '__main__':
@@ -214,13 +224,14 @@ if __name__ == '__main__':
             second = query_seplag[1]
             if first[1] == second[1] and first[2] == second[2] and first[3] == second[3] and first[4] == second[4] and \
                     first[5] == second[5]:
+                print(query_seplag)
                 update_associate(associados[i], first)
                 continue
             else:
                 continue
 
         if not query_seplag:
-            None
-            #print('Não tem dados')
+            print('Não tem dados')
         else:
+            print(query_seplag)
             update_associate(associados[i], query_seplag[0])
